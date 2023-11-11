@@ -1,0 +1,265 @@
+<!DOCTYPE HTML>
+<BODY BACKGROUND="スライド3.PNG">
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOEI CLEAN NETWORK</title>
+    <style>.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+        }
+        .form-group {
+            margin: 10px;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+        }
+        input, textarea {
+            display: inline-block;
+            width: 600px;
+        }
+        textarea {
+            height: 100px;
+        }
+        button {
+            display: inline-block;
+            width: 100px;
+            margin: 10px;
+        }
+        .comment {
+            border: 1px solid black;
+            padding: 10px;
+            margin: 10px;
+        }
+        .comment-header {
+            display: flex;
+            align-items: center;
+        }
+        .comment-name {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .comment-time {
+            color: gray;
+        }
+        .comment-body {
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        // このスクリプトは、アカウント設定を保存するための関数を定義しています。
+        function saveSettings() {
+            // 入力された名前、アドレス、パスワードを取得します。
+            var name = document.getElementById("name").value;
+            var address = document.getElementById("address").value;
+            var password = document.getElementById("password").value;
+            // 入力された値を検証します。
+            if (name == "" || address == "" || password == "") {
+                alert("名前、アドレス、パスワードを入力してください。");
+                return;
+            }
+            // 入力された値をサーバーに送信します。
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "save.php", true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.send("name=" + name + "&address=" + address + "&password=" + password);
+            // サーバーからの応答を受け取ります。
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var response = xhr.responseText;
+                    if (response == "success") {
+                        alert("アカウント設定を保存しました。");
+                    } else {
+                        alert("アカウント設定の保存に失敗しました。");
+                    }
+                }
+            };
+        }
+
+        // このスクリプトは、コメントを送信するための関数を定義しています。
+        function sendComment() {
+            // 入力されたコメントを取得します。
+            var comment = document.getElementById("comment").value;
+            // 入力されたコメントを検証します。
+            if (comment == "") {
+                alert("コメントを入力してください。");
+                return;
+            }
+            // 入力されたコメントをサーバーに送信します。
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "send.php", true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.send("comment=" + comment);
+            // サーバーからの応答を受け取ります。
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var response = xhr.responseText;
+                    if (response == "success") {
+                        alert("コメントを送信しました。");
+                        // コメントを空にします。
+                        document.getElementById("comment").value = "";
+                        // 送られたコメントを更新します。
+                        showComments();
+                    } else {
+                        alert("コメントの送信に失敗しました。");
+                    }
+                }
+            };
+        }
+
+        // このスクリプトは、送られたコメントを表示するための関数を定義しています。
+        function showComments() {
+            // サーバーからコメントのデータを取得します。
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "get.php", true);
+            xhr.send();
+            // サーバーからの応答を受け取ります。
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.status == "success") {
+                        // コメントのデータを配列に格納します。
+                        var comments = response.data;
+                        // コメントのデータをHTMLに変換します。
+                        var html = "";
+                        for (var i = 0; i < comments.length; i++) {
+                            var comment = comments[i];
+                            html += "<div class='comment'>";
+                            html += "<div class='comment-header'>";
+                            html += "<span class='comment-name'>" + comment.name + "</span>";
+                            html += "<span class='comment-time'>" + comment.time + "</span>";
+                            html += "</div>";
+                            html += "<div class='comment-body'>";
+                            html += "<p>" + comment.content + "</p>";
+                            html += "</div>";
+                            html += "</div>";
+                        }
+                        // HTMLを表示する要素に挿入します。
+                        document.getElementById("comments").innerHTML = html;
+                    } else {
+                        alert("コメントの取得に失敗しました。");
+                    }
+                }
+            };
+        }
+
+        // このスクリプトは、スレッドを投稿するための関数を定義しています。
+        function postThread() {
+            // 入力されたタイトルと内容を取得します。
+            var title = document.getElementById("title").value;
+            var content = document.getElementById("content").value;
+            // 入力された値を検証します。
+            if (title == "" || content == "") {
+                alert("タイトルと内容を入力してください。");
+                return;
+            }
+            // 入力された値をサーバーに送信します。
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "post.php", true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.send("title=" + title + "&content=" + content);
+            // サーバーからの応答を受け取ります。
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var response = xhr.responseText;
+                    if (response == "success") {
+                        alert("スレッドを投稿しました。");
+                        // タイトルと内容を空にします。
+                        document.getElementById("title").value = "";
+                        document.getElementById("content").value = "";
+                        // 送られたコメントを更新します。
+                        showComments();
+                    } else {
+                        alert("スレッドの投稿に失敗しました。");
+                    }
+                }
+            };
+        }
+    </script>
+</head>
+<p> </p>
+<p> </p>
+<p> </p>
+<body>
+    <center><a href="https://www.soei.ed.jp/"><img src="清掃ラボへ 2.jpg" width="160" height="47"></a>&emsp;<a href="とりあえず書いてみよう 2023 11 09 2.html"><img src="SOEI CLEAN NETWORK ロゴ案 1.jpg" width="756" height="151"></a>&emsp;<a href="とりあえず書いてみよう 2023 11 09 3.html"><img src="清掃ラボへ 1.jpg" width="160" height="47"></a></center>
+</body>
+<p> </p>
+<p> </p>
+<p> </p>
+<body>
+<center>
+<p>
+<font size="4" color="#000000" face="ＭＳ Ｐゴシック,ＭＳ ゴシック">
+<br>
+SOEI CLEAN NETWORKは、学校や地域の「きれい」について、情報や意見を交換できるソーシャルネットワークサイトです。
+<br>
+このサイトでは、「きれい」に関するイベント情報や活動予定を投稿したり、他のユーザーからのコメントやメッセージを受け取ったり、送ったりすることができます。
+<br>
+このサイトは、みんなで学校をきれいにしたいと思う人たちのために作られました。あなたも一緒に、この学校を、地域ををきれいにしましょう。
+<br>
+<br>
+</font>
+<p>
+</center>
+</body>
+<p> </p>
+<p> </p>
+<p> </p>
+<body>
+<center>
+<body onload="showComments()">
+    <div class="container">
+        <form>
+            <div class="form-group">
+                <label for="name">名前:</label>
+                <input type="text" id="name" name="name" value="山田太郎">
+            </div>
+            <div class="form-group">
+                <label for="address"><nobr>アドレス:</label>
+                <input type="text" id="address" name="address" value="yamada@soei.com"></nobr>
+            </div>
+            <div class="form-group">
+                <label for="password">パスワード:</label>
+                <input type="password" id="password" name="password" value="********">
+            </div>
+            <button type="button" onclick="saveSettings()">変更を保存</button>
+        </form>
+        <h2>コメント送信</h2>
+        <form>
+            <div class="form-group">
+                <label for="comment">コメント:</label>
+                <textarea id="comment" name="comment"></textarea>
+            </div>
+            <button type="button" onclick="sendComment()">送信</button>
+            <button type="reset">取り消し</button>
+        </form>
+        <h2>送られたコメント</h2>
+</center>
+
+</body>
+<body>
+ <p style="text-align: right">
+<a href="https://www.soei.ed.jp/"><img src="清掃ラボへ 2.jpg" width="160" height="47"></a>&emsp;&emsp;<a href="https://www.soei.ed.jp/s_junior/j_club/"><img src="清掃ラボへ 3.jpg" width="160" height="47"></a>&emsp;&emsp;<a href="とりあえず書いてみよう 2023 11 09 3.html"><img src="清掃ラボへ 1.jpg" width="160" height="47"></a>&emsp;&emsp;<a href="とりあえず書いてみよう 2023 11 09 2.html"><img src="清掃ラボへ 4.jpg" width="160" height="47"></a>
+<p style="text-align: right">
+</body>
+<body>
+ <p style="text-align: right">
+<B><SCRIPT language="JavaScript">
+today=new Date();
+document.write("現在日時：",today.toLocaleString());
+</SCRIPT></B>
+<p style="text-align: right">
+</body>
+<body>
+ <p style="text-align: right">
+ ※お使いの端末によっては、正しく表示されない場合がございます。<p>
+</body>
+<body>
+ <p style="text-align: right">
+ © 2023 YOKOHAMA SOEI Junior & Senior High School Cleaning lab C-NETWORK<p>
+</body>
+</html>
